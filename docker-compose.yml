@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: until-nginx
+    image: nginx:latest
+    volumes:
+      - ./.docker/nginx:/etc/nginx/conf.d
+    ports:
+      - "8000:80"
+    depends_on:
+      - php
+
+  php:
+    container_name: until-php
+    image: php-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www
+      - laravel_storage:/var/www/storage
+    depends_on:
+      - mysql
+
+  mysql:
+    container_name: until-mysql
+    image: mysql:8.0
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: until
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8101:3306"
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+
+  phpmyadmin:
+    container_name: until-phpmyadmin
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_ARBITRARY=1
+volumes:
+  mysql_data:
+  laravel_storage:
