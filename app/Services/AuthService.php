@@ -25,7 +25,7 @@ class AuthService
         ]);
 
         if ($valid->fails()){
-            return ResultService::error('Ошибка валидации', $valid->errors()->toArray(), 422);
+            return ResultService::error('Ошибка валидации', $valid->errors()->toArray(), true, 422);
         }
 
         $user = User::create([
@@ -40,6 +40,19 @@ class AuthService
 
         $userToken = $user->createToken($user->name)->plainTextToken;
 
-        return ResultService::success('Register success', ['user' => $user , 'token' => $userToken], 201);
+        return ResultService::success('Register success', ['user' => $user , 'token' => $userToken], false, 201);
+    }
+
+    public function login(string $email, string $password) :ResultService
+    {
+        if (!Auth::attempt(['email' => $email, 'password' => $password])) {
+            return ResultService::error('Данные для входа не верны',[], true,422);
+        }
+
+        $user = Auth::getUser();
+
+        $userToken = $user->createToken($user->name)->plainTextToken;
+
+        return ResultService::success('Вход успешно выполнен', ['user' => $user , 'token' => $userToken], false,201);
     }
 }

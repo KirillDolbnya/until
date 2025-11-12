@@ -19,7 +19,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./:/var/www
-      - laravel_storage:/var/www/storage
     depends_on:
       - mysql
 
@@ -46,4 +45,3 @@ services:
       - PMA_ARBITRARY=1
 volumes:
   mysql_data:
-  laravel_storage:

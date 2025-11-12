@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginFormRequest;
+use App\Http\Requests\RegisterFormRequest;
 use App\Http\Resources\AuthResource;
 use App\Services\AuthService;
-use Illuminate\Http\Request;
-use App\Http\Requests\RegisterFormRequest;
 
 class AuthController extends Controller
 {
 
     public function __construct(
-        private readonly AuthService  $registerService,
-//        private readonly LoginService  $loginService;
+        private readonly AuthService $authService,
     )
     {
     }
@@ -21,7 +20,7 @@ class AuthController extends Controller
     public function register(RegisterFormRequest $request)
     {
 
-        $result = $this->registerService->register(
+        $result = $this->authService->register(
             $request->input('name'),
             $request->input('lastName'),
             $request->input('age'),
@@ -31,7 +30,7 @@ class AuthController extends Controller
             $request->input('password'),
         );
 
-        if ($result->errors){
+        if ($result->isError){
             return response()->json([
                 'message' => $result->message,
                 'errors' => $result->errors,
@@ -42,7 +41,21 @@ class AuthController extends Controller
         return new AuthResource($result->data);
     }
 
-    public function login(Request $request){
+    public function login(LoginFormRequest $request)
+    {
+        $result = $this->authService->login(
+          $request->input('email'),
+          $request->input('password')
+        );
 
+        if($result->isError){
+            return response()->json([
+                'message' => $result->message,
+                'errors' => $result->errors,
+                'code' => $result->code
+            ]);
+        }
+
+        return new AuthResource($result->data);
     }
 }
